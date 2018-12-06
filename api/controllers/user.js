@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const bodyParser = require('body-parser');
 
 
 const JWT_KEY = process.env.JWT_KEY;
@@ -42,6 +43,7 @@ exports.data_all_user = exports.user_signup = (req, res, next) => {
 };
 
 exports.user_signup = (req, res, next) => {
+ // console.log(req.body)
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
@@ -49,6 +51,7 @@ exports.user_signup = (req, res, next) => {
         return res.status(409).json({
           message: "Mail exists"
         });
+     
       } else {
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
@@ -59,12 +62,15 @@ exports.user_signup = (req, res, next) => {
             const user = new User({
               _id: new mongoose.Types.ObjectId(),
               email: req.body.email,
-              password: hash
+              password: hash,
+              firstName: req.body.firstName,
+              lastName: req.body.lastName
             });
+            console.log(user)
             user
               .save()
               .then(result => {
-                console.log(result);
+            //    console.log(result);
                 res.status(201).json({
                   message: "User created"
                 });
@@ -82,10 +88,13 @@ exports.user_signup = (req, res, next) => {
 };
 
 exports.user_login = (req, res, next) => {
+  console.log(req.body)
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
       if (user.length < 1) {
+        console.log(user.length)
+       
         return res.status(401).json({
           message: "Auth failed"
         });

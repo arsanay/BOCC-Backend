@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 const userRoutes = require('./api/routes/user');
+const taskRoutes = require('./api/routes/tasks');
 const config = {useNewUrlParser: true}
 require('dotenv').config()
 
@@ -41,12 +42,12 @@ app.use((req,res,next)=>{
 });
 
 //Routes which should handle any request
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-
 app.use('/products',productRoutes);
 app.use('/orders',orderRoutes)
 app.use('/user',userRoutes)
+app.use('/task',taskRoutes)
 app.use(morgan('dev'));
 
 
