@@ -3,9 +3,10 @@ const Task = require("../models/task");
 
 exports.tasks_get_all = (req, res, next) => {
   Task.find()
-    .select("id title content creator deadline taskImage ")
+    .select("id title content creator deadline taskImage progress ")
     .exec()
     .then(docs => {
+      console.log(docs)
       const response = {
         count: docs.length,
         task: docs.map(doc => {
@@ -16,6 +17,7 @@ exports.tasks_get_all = (req, res, next) => {
             deadline: doc.deadline,
             taskImage: doc.taskImage,
             _id: doc._id,
+            progress: doc.progress,
             request: {
               type: "GET",
               url: "http://localhost:3000/tasks/" + doc._id
@@ -47,7 +49,8 @@ exports.tasks_create_task = (req, res, next) => {
     content: req.body.content,
     creator: req.body.creator,
     deadline: req.body.deadline,
-    imageFile: req.body.imageFile
+    imageFile: req.body.imageFile,
+    progress:req.body.progress
   });
   console.log(task)
   task
