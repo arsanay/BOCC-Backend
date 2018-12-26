@@ -1,4 +1,7 @@
 const express = require("express");
+var cookieParser = require('cookie-parser')
+var app = express()
+app.use(cookieParser())
 const router = express.Router();
 const multer = require('multer');
 const checkAuth = require('../middleware/check-auth');
@@ -30,14 +33,14 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-router.get("/", TasksController.tasks_get_all);
+router.get("/", /*checkAuth*/ TasksController.tasks_get_all);
 
-router.post("/", /*checkAuth, upload.single('taskImage'),*/ TasksController.tasks_create_task);
+router.post("/", /*checkAuth, /*upload.single('taskImage'),*/ TasksController.tasks_create_task);
 
-router.get("/:taskId", TasksController.tasks_get_task);
+router.get("/taskId", TasksController.tasks_get_task);
 
-router.patch("/:taskId", checkAuth, TasksController.tasks_update_task);
+router.patch("/:taskId", /*checkAuth,*/ TasksController.tasks_update_task);
 
-router.delete("/:taskId", checkAuth, TasksController.tasks_delete);
+router.delete("/:taskId", checkAuth,  TasksController.tasks_delete);
 
 module.exports = router;

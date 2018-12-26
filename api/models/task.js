@@ -7,7 +7,7 @@ const taskSchema = mongoose.Schema({
     creator: {type: String, required: true},
     deadline: {type:Date, required:true},
     imageFile: {type:String, required:false},
-    progress: {type:Number,required:true}
+    progress: {type:Number,required:false}
 });
 
 module.exports = mongoose.model('Task',taskSchema);

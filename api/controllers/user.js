@@ -2,48 +2,51 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const bodyParser = require('body-parser');
-
+const bodyParser = require("body-parser");
+var express = require("express");
+var cookieParser = require("cookie-parser");
+var app = express();
+app.use(cookieParser());
 
 const JWT_KEY = process.env.JWT_KEY;
 
 exports.data_all_user = exports.user_signup = (req, res, next) => {
   User.find()
-  .select("email password")
-  .exec()
-  .then(docs => {
-    const response = {
-      count: docs.length,
-      products: docs.map(doc => {
-        return {
-          email: doc.email,
-          password: doc.password,
-          _id: doc._id,
-          request: {
-            type: "GET",
-            url: "http://localhost:3000/products/" + doc._id
-          }
-        };
-      })
-    };
-    //   if (docs.length >= 0) {
-    res.status(200).json(response);
-    //   } else {
-    //       res.status(404).json({
-    //           message: 'No entries found'
-    //       });
-    //   }
-  })
-  .catch(err => {
-    console.log(err);
-    res.status(500).json({
-      error: err
+    .select("email password")
+    .exec()
+    .then(docs => {
+      const response = {
+        count: docs.length,
+        products: docs.map(doc => {
+          return {
+            email: doc.email,
+            password: doc.password,
+            _id: doc._id,
+            request: {
+              type: "GET",
+              url: "http://localhost:3000/products/" + doc._id
+            }
+          };
+        })
+      };
+      //   if (docs.length >= 0) {
+      res.status(200).json(response);
+      //   } else {
+      //       res.status(404).json({
+      //           message: 'No entries found'
+      //       });
+      //   }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
     });
-  });
 };
 
 exports.user_signup = (req, res, next) => {
- // console.log(req.body)
+  // console.log(req.body)
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
@@ -51,7 +54,6 @@ exports.user_signup = (req, res, next) => {
         return res.status(409).json({
           message: "Mail exists"
         });
-     
       } else {
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
@@ -66,11 +68,11 @@ exports.user_signup = (req, res, next) => {
               firstName: req.body.firstName,
               lastName: req.body.lastName
             });
-            console.log(user)
+            // console.log(user)
             user
               .save()
               .then(result => {
-            //    console.log(result);
+                //    console.log(result);
                 res.status(201).json({
                   message: "User created"
                 });
@@ -88,13 +90,13 @@ exports.user_signup = (req, res, next) => {
 };
 
 exports.user_login = (req, res, next) => {
-  console.log(req.body)
+  // console.log(req.body)
   User.find({ email: req.body.email })
     .exec()
     .then(user => {
       if (user.length < 1) {
-        console.log(user.length)
-       
+        // console.log(user.length)
+
         return res.status(401).json({
           message: "Auth failed"
         });
@@ -106,21 +108,41 @@ exports.user_login = (req, res, next) => {
           });
         }
         if (result) {
-          const token = jwt.sign(
-            {
-              email: user[0].email,
-              userId: user[0]._id
-            },
-            JWT_KEY,
-            {
-              expiresIn: "1h"
-            }
-          );
+          const jwtPayload = {
+            userId: user[0]._id
+          };
+          const authJwtToken = jwt.sign(jwtPayload, JWT_KEY);
+
+          const cookieOptions = {
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 30 * 3 * 100
+          };
+          res.cookie("boccAccessJwt", authJwtToken, cookieOptions);
+          console.log(authJwtToken);
+
+          //  console.log(res.cookie)
+          // const token = jwt.sign(
+          //   {
+          //     email: user[0].email,
+          //     userId: user[0]._id
+          //   },
+          //   JWT_KEY,
+          //   {
+          //     expiresIn: "1h"
+          //   }
+          // );
+          // console.log(token)
+          // const cookieOptions ={
+          //     httpOnly:true,
+          //     expires:0
+          // // }
+          // res.cookie('BOCCAccessJwt', token, cookieOptions)
           return res.status(200).json({
-            message: "Auth successful",
-            token: token
+            fullname: user[0].firstName + user[0].lastName,
+            uid: user[0]._id
           });
         }
+
         res.status(401).json({
           message: "Auth failed"
         });
@@ -143,7 +165,7 @@ exports.user_delete = (req, res, next) => {
       });
     })
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       res.status(500).json({
         error: err
       });

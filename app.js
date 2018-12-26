@@ -3,6 +3,8 @@ const app = express();
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser')
+var cookieParser = require('cookie-parser')
+app.use(cookieParser())
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 const userRoutes = require('./api/routes/user');
@@ -30,11 +32,11 @@ mongoose.connect(`mongodb://localhost:27017/${DB_NAME}`,
 );
 
 app.use((req,res,next)=>{
-    res.header("Access-Control-Allow-Origin","*")
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+
     if (req.method ==   'OPTIONS'){
         res.header('Access-Control-Allow-Methods', 'PUTS, POST, PATCH, DELETE');
     }   

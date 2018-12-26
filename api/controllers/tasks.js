@@ -6,7 +6,7 @@ exports.tasks_get_all = (req, res, next) => {
     .select("id title content creator deadline taskImage progress ")
     .exec()
     .then(docs => {
-      console.log(docs)
+     // console.log(docs)
       const response = {
         count: docs.length,
         task: docs.map(doc => {
@@ -97,11 +97,13 @@ exports.tasks_get_task = (req, res, next) => {
 };
 
 exports.tasks_update_task = (req, res, next) => {
+  //console.log(req.params.taskId)
   const id = req.params.taskId;
   const updateOps = {};
   for (const ops of req.body) {
     updateOps[ops.propName] = ops.value;
   }
+
   Task.update({ _id: id }, { $set: updateOps })
     .exec()
     .then(result => {
@@ -112,7 +114,7 @@ exports.tasks_update_task = (req, res, next) => {
           url: "http://localhost:3000/tasks/" + id
         }
       });
-    })
+    }) 
     .catch(err => {
       console.log(err);
       res.status(500).json({
